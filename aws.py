@@ -77,7 +77,7 @@ def launch_instance(ami, ins_type, use_spot):
     
     return ins_id, ip
 
-def upload_files(ip, files):
+def upload_files_instance(ip, files):
     """
     Upload files to an EC2 instance
     """

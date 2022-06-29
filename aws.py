@@ -83,6 +83,16 @@ def upload_files_instance(ip, files):
     Upload files to an EC2 instance
     """
     for file in files:
+        # create the directories for the file if required
+        if file.find('/') > 0:
+            s = 0
+            e = file.find('/', s)
+            while e > 0:
+                folder = file[:e]
+                subprocess.call(['ssh', '-o', 'StrictHostKeyChecking=no', f'ubuntu@{ip}', 'mkdir', folder])
+                s = e + 1
+
+        # upload the file
         subprocess.call(['scp', '-o', 'StrictHostKeyChecking=no', file, f'ubuntu@{ip}:~/{file}'])
 
 def run_cmd(ip, cmd):

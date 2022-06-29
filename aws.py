@@ -3,10 +3,6 @@ import time
 import logging
 
 log = logging.getLogger(__name__)
-if __name__ == "__main__":
-    logging.basicConfig(
-        level=logging.INFO, format="%(asctime)s %(module)s %(levelname)s: %(message)s"
-    )
 
 def upload_file_s3(file, s3_bucket, s3_name):
     """
@@ -41,7 +37,7 @@ def download_file_s3(s3_bucket, s3_filename, local_filename):
     s3 = boto3.client('s3')
     s3.download_file(s3_bucket, s3_filename, local_filename)
 
-def launch_instance(ami, ins_type, use_spot, files, ip, cmd):
+def launch_instance(ami, ins_type, use_spot):
     """
     Launch an EC2 instance
     """
@@ -68,11 +64,14 @@ def launch_instance(ami, ins_type, use_spot, files, ip, cmd):
     log.info(f'id of launched instance: {ins_id}')
 
     # wait until it's ready
-    log.info('waiting until the instance is ready')
-    time.sleep(240)
-
-    # get the ip
     ins = boto3.resource('ec2').Instance(ins_id)
+    while True:
+        time.sleep(10)
+        state = ins.state['Name']
+        if state == 'running':
+            break
+        else:
+            log.info(f'waiting for instance to be ready, current state: {state}')
     ip = ins.public_ip_address
     log.info(f'ip of launched instance: {ip}')
     

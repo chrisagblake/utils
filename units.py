@@ -38,7 +38,7 @@ def lim_2pi(v):
     """
     Limit a number between 0/2pi
     """
-    while v < 0
+    while v < 0:
         v += 2 * math.pi
     while v > 2 * math.pi:
         v -= 2 * math.pi

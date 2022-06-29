@@ -5,7 +5,7 @@ import subprocess
 
 log = logging.getLogger(__name__)
 
-def upload_files_s3(files, s3_bucket, s3_prefix, profile_name=None):
+def upload_files_s3(files, s3_bucket, s3_prefix, profile_name=None, ignore_file_path=False):
     """
     upload files to s3
     """
@@ -15,7 +15,11 @@ def upload_files_s3(files, s3_bucket, s3_prefix, profile_name=None):
     else:
         s3 = boto3.client('s3')
     for file in files:
-        s3.upload_file(file, s3_bucket, f'{s3_prefix}/{file}')
+        if ignore_file_path:
+            name = file[file.rfind('/')+1:]
+        else:
+            name = file
+        s3.upload_file(file, s3_bucket, f'{s3_prefix}/{name}')
 
 def upload_file_s3(file, s3_bucket, s3_name, profile_name=None):
     """

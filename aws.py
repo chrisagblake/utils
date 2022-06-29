@@ -1,4 +1,5 @@
 import boto3
+import time
 import logging
 
 log = logging.getLogger(__name__)
@@ -14,7 +15,7 @@ def upload_file_s3(file, s3_bucket, s3_name):
     s3 = boto3.client('s3')
     s3.upload_file(file, s3_bucket, s3_name)
 
-def download_files_s3(local_dir, s3_bucket, s3_prefix, filter=None):
+def download_files_s3(local_dir, s3_bucket, s3_prefix, file_filter=None):
     """
     download files in a given folder from s3
     """
@@ -30,15 +31,13 @@ def download_files_s3(local_dir, s3_bucket, s3_prefix, filter=None):
     for key in keys:
         log.info(f'downloading: {key}')
         name = key[key.rfind('/')+1:]
-        if filter is None or name.find(filter) >= 0:
+        if file_filter is None or name.find(file_filter) >= 0:
             s3.download_file(s3_bucket, key, f'{local_dir}/{name}')
 
 def download_file_s3(s3_bucket, s3_filename, local_filename):
     """
     download a file from s3
     """
-
-    # download the file 
     s3 = boto3.client('s3')
     s3.download_file(s3_bucket, s3_filename, local_filename)
 

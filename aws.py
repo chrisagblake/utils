@@ -5,20 +5,40 @@ import subprocess
 
 log = logging.getLogger(__name__)
 
-def upload_file_s3(file, s3_bucket, s3_name):
+def upload_files_s3(files, s3_bucket, s3_prefix, profile_name=None):
+    """
+    upload files to s3
+    """
+    if profile_name is not None:
+        sess = boto3.session.Session(profile_name=profile_name)
+        s3 = sess.client('s3')
+    else:
+        s3 = boto3.client('s3')
+    for file in files:
+        s3.upload_file(file, s3_bucket, f'{s3_prefix}/{file}')
+
+def upload_file_s3(file, s3_bucket, s3_name, profile_name=None):
     """
     upload a file to s3
     """
-    s3 = boto3.client('s3')
+    if profile_name is not None:
+        sess = boto3.session.Session(profile_name=profile_name)
+        s3 = sess.client('s3')
+    else:
+        s3 = boto3.client('s3')
     s3.upload_file(file, s3_bucket, s3_name)
 
-def download_files_s3(local_dir, s3_bucket, s3_prefix, file_filter=None):
+def download_files_s3(local_dir, s3_bucket, s3_prefix, file_filter=None, profile_name=None):
     """
     download files in a given folder from s3
     """
 
     # get the list of files to download
-    s3 = boto3.client('s3')
+    if profile_name is not None:
+        sess = boto3.session.Session(profile_name=profile_name)
+        s3 = sess.client('s3')
+    else:
+        s3 = boto3.client('s3')
     keys = []
     response = s3.list_objects(Bucket=s3_bucket, Prefix=s3_prefix)
     for obj in response['Contents']:
@@ -31,11 +51,15 @@ def download_files_s3(local_dir, s3_bucket, s3_prefix, file_filter=None):
         if file_filter is None or name.find(file_filter) >= 0:
             s3.download_file(s3_bucket, key, f'{local_dir}/{name}')
 
-def download_file_s3(s3_bucket, s3_filename, local_filename):
+def download_file_s3(s3_bucket, s3_filename, local_filename, profile_name=None):
     """
     download a file from s3
     """
-    s3 = boto3.client('s3')
+    if profile_name is not None:
+        sess = boto3.session.Session(profile_name=profile_name)
+        s3 = sess.client('s3')
+    else:
+        s3 = boto3.client('s3')
     s3.download_file(s3_bucket, s3_filename, local_filename)
 
 def launch_instance(ami, ins_type, use_spot):

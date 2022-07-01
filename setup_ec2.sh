@@ -40,6 +40,7 @@ anaconda3/bin/conda install scipy
 anaconda3/bin/conda install shapely
 anaconda3/bin/conda install geopandas
 anaconda3/bin/conda install fuzzywuzzy 
+anaconda3/bin/conda install cython 
 anaconda3/bin/conda install -c huggingface transformers
 anaconda3/bin/conda install -c huggingface -c conda-forge datasets
 anaconda3/bin/conda install -c conda-forge scikit-learn

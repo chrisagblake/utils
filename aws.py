@@ -136,3 +136,35 @@ def run_cmd(ip, cmd):
     run a command within a tmux session on an EC2 instance
     """
     subprocess.call(['ssh', f'ubuntu@{ip}', 'tmux', 'new-session', '-d', cmd])
+
+def monitor_spot_instance(ami, ins_type, ins_id, files, cmd):
+    """
+    monitor a spot instance,
+    if it get's shutdown, wait until a new one is ready
+    then launch it and continue the code that was running
+    """
+
+    while True:
+        
+        # check the current state of the instance
+        try:
+            ins = boto3.resource('ec2').Instance(ins_id)
+        except:
+            state = ''
+        else:
+            state = ins.state['Name']
+        if state != 'running':
+            
+            # the instance is no longer running, try to launch a new instance
+            try:
+                new_id, ins_ip = launch_instance(ami, ins_type, True)
+            except:
+                log.info('unable to launch a new spot instance, trying again in 10 minutes')
+            else:
+                upload_files_instance(ins_ip, files)
+                run_cmd(ins_ip, cmd)
+                ins_id = new_id
+
+        # wait 10 minutes
+        time.sleep(600)
+

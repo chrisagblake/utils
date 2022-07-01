@@ -5,15 +5,22 @@ import subprocess
 
 log = logging.getLogger(__name__)
 
-def upload_files_s3(files, s3_bucket, s3_prefix, profile_name=None, ignore_file_path=False):
+def connect_s3(profile_name):
     """
-    upload files to s3
+    create an s3 client
     """
     if profile_name is not None:
         sess = boto3.session.Session(profile_name=profile_name)
         s3 = sess.client('s3')
     else:
         s3 = boto3.client('s3')
+    return s3
+
+def upload_files_s3(files, s3_bucket, s3_prefix, profile_name=None, ignore_file_path=False):
+    """
+    upload files to s3
+    """
+    s3 = connect_s3(profile_name)
     for file in files:
         if ignore_file_path:
             name = file[file.rfind('/')+1:]
@@ -25,11 +32,7 @@ def upload_file_s3(file, s3_bucket, s3_name, profile_name=None):
     """
     upload a file to s3
     """
-    if profile_name is not None:
-        sess = boto3.session.Session(profile_name=profile_name)
-        s3 = sess.client('s3')
-    else:
-        s3 = boto3.client('s3')
+    s3 = connect_s3(profile_name)
     s3.upload_file(file, s3_bucket, s3_name)
 
 def download_files_s3(local_dir, s3_bucket, s3_prefix, file_filter=None, profile_name=None):
@@ -38,15 +41,15 @@ def download_files_s3(local_dir, s3_bucket, s3_prefix, file_filter=None, profile
     """
 
     # get the list of files to download
-    if profile_name is not None:
-        sess = boto3.session.Session(profile_name=profile_name)
-        s3 = sess.client('s3')
-    else:
-        s3 = boto3.client('s3')
+    s3 = connect_s3(profile_name)
     keys = []
     response = s3.list_objects(Bucket=s3_bucket, Prefix=s3_prefix)
     for obj in response['Contents']:
         keys.append(obj['Key'])
+    while response['isTruncated']:
+        response = s3.list_objects(Bucket=s3_bucket, Prefix=s3_prefix, Marker=keys[-1])
+        for obj in response['Contents']:
+            keys.append(obj['Key'])
 
     # download the trained model and associated files
     for key in keys:
@@ -59,12 +62,19 @@ def download_file_s3(s3_bucket, s3_filename, local_filename, profile_name=None):
     """
     download a file from s3
     """
-    if profile_name is not None:
-        sess = boto3.session.Session(profile_name=profile_name)
-        s3 = sess.client('s3')
-    else:
-        s3 = boto3.client('s3')
+    s3 = connect_s3(profile_name)
     s3.download_file(s3_bucket, s3_filename, local_filename)
+
+def list_s3_directories(s3_bucket, s3_prefix, profile_name=None):
+    """
+    list all the directories in a given bucket with the set prefix
+    """
+    s3 = connect_s3(profile_name)
+    dirs = []
+    response = s3.list_objects(Bucket=s3_bucket, Prefix=s3_prefix, Delimiter='/')
+    for obj in response['CommonPrefixes']:
+        dirs.append(obj['Prefix'][:-1])
+    return dirs
 
 def launch_instance(ami, ins_type, use_spot):
     """

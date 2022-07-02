@@ -90,14 +90,16 @@ def launch_instance(ami, ins_type, use_spot):
             InstanceType = ins_type,
             InstanceMarketOptions = {'MarketType': 'spot'},
             MaxCount = 1,
-            MinCount = 1
+            MinCount = 1,
+            KeyName='macbook pro'
         )
     else:
         res = ec2.run_instances(
             ImageId = ami,
             InstanceType = ins_type,
             MaxCount = 1,
-            MinCount = 1
+            MinCount = 1,
+            KeyName='macbook pro'
         )
     ins_id = res['Instances'][0]['InstanceId']
     log.info(f'id of launched instance: {ins_id}')

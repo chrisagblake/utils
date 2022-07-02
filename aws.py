@@ -76,7 +76,7 @@ def list_s3_directories(s3_bucket, s3_prefix, profile_name=None):
         dirs.append(obj['Prefix'][:-1])
     return dirs
 
-def launch_instance(ami, ins_type, use_spot):
+def launch_instance(ami, ins_type, use_spot, key_name):
     """
     Launch an EC2 instance
     """
@@ -91,7 +91,7 @@ def launch_instance(ami, ins_type, use_spot):
             InstanceMarketOptions = {'MarketType': 'spot'},
             MaxCount = 1,
             MinCount = 1,
-            KeyName='macbook pro'
+            KeyName=key_name
         )
     else:
         res = ec2.run_instances(
@@ -99,7 +99,7 @@ def launch_instance(ami, ins_type, use_spot):
             InstanceType = ins_type,
             MaxCount = 1,
             MinCount = 1,
-            KeyName='macbook pro'
+            KeyName=key_name
         )
     ins_id = res['Instances'][0]['InstanceId']
     log.info(f'id of launched instance: {ins_id}')

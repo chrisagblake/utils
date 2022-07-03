@@ -105,9 +105,9 @@ def launch_instance(ami, ins_type, use_spot, key_name):
     log.info(f'id of launched instance: {ins_id}')
 
     # wait until it's ready
-    ins = boto3.resource('ec2').Instance(ins_id)
     while True:
         time.sleep(10)
+        ins = boto3.resource('ec2').Instance(ins_id)
         state = ins.state['Name']
         if state == 'running':
             break

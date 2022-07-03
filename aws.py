@@ -120,7 +120,7 @@ def launch_instance(ami, ins_type, use_spot, key_name):
         if res == 0:
             break
         else:
-            log.info('waiting for instance to be ready')
+            log.info('waiting for ssh access to instance')
     log.info(f'ip of launched instance: {ip}')
     
     return ins_id, ip

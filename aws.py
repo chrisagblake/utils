@@ -116,7 +116,7 @@ def launch_instance(ami, ins_type, use_spot, key_name):
     ip = ins.public_ip_address
     while True:
         time.sleep(10)
-        res = subprocess.call(['ssh', '-o', 'StrictHostKeyChecking=no', f'ubuntu@{ip}', 'echo hello'])
+        res = subprocess.call(['ssh', '-o', 'StrictHostKeyChecking=no', f'ubuntu@{ip}', 'echo ready'])
         if res == 0:
             break
         else:

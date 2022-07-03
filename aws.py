@@ -114,6 +114,13 @@ def launch_instance(ami, ins_type, use_spot, key_name):
         else:
             log.info(f'waiting for instance to be ready, current state: {state}')
     ip = ins.public_ip_address
+    while True:
+        time.sleep(10)
+        res = subprocess.call(['ssh', '-o', 'StrictHostKeyChecking=no', f'ubuntu@{ip}', 'echo hello'])
+        if res == 0:
+            break
+        else:
+            log.info('waiting for instance to be ready')
     log.info(f'ip of launched instance: {ip}')
     
     return ins_id, ip
@@ -127,11 +134,11 @@ def upload_files_instance(ip, files):
         e = file.find('/')
         while e > 0:
             folder = file[:e]
-            subprocess.call(['ssh', '-o', 'StrictHostKeyChecking=no', f'ubuntu@{ip}', 'mkdir', folder])
+            subprocess.call(['ssh', f'ubuntu@{ip}', 'mkdir', folder])
             e = file.find('/', e + 1)
 
         # upload the file
-        subprocess.call(['scp', '-o', 'StrictHostKeyChecking=no', file, f'ubuntu@{ip}:~/{file}'])
+        subprocess.call(['scp', file, f'ubuntu@{ip}:~/{file}'])
 
 def run_cmd(ip, cmd):
     """

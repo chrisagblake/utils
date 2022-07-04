@@ -44,12 +44,13 @@ def download_files_s3(local_dir, s3_bucket, s3_prefix, file_filter=None, profile
     s3 = connect_s3(profile_name)
     keys = []
     response = s3.list_objects(Bucket=s3_bucket, Prefix=s3_prefix)
-    for obj in response['Contents']:
-        keys.append(obj['Key'])
-    while response['isTruncated']:
-        response = s3.list_objects(Bucket=s3_bucket, Prefix=s3_prefix, Marker=keys[-1])
+    if 'Contents' in response:
         for obj in response['Contents']:
             keys.append(obj['Key'])
+        while response['IsTruncated']:
+            response = s3.list_objects(Bucket=s3_bucket, Prefix=s3_prefix, Marker=keys[-1])
+            for obj in response['Contents']:
+                keys.append(obj['Key'])
 
     # download the trained model and associated files
     for key in keys:
@@ -82,8 +83,9 @@ def list_s3_directories(s3_bucket, s3_prefix, profile_name=None):
     s3 = connect_s3(profile_name)
     dirs = []
     response = s3.list_objects(Bucket=s3_bucket, Prefix=s3_prefix, Delimiter='/')
-    for obj in response['CommonPrefixes']:
-        dirs.append(obj['Prefix'][:-1])
+    if 'CommonPrefixes' in response:
+        for obj in response['CommonPrefixes']:
+            dirs.append(obj['Prefix'][:-1])
     return dirs
 
 def launch_instance(ami, ins_type, use_spot, key_name):

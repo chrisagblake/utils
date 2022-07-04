@@ -54,9 +54,11 @@ def download_files_s3(local_dir, s3_bucket, s3_prefix, file_filter=None, profile
     # download the trained model and associated files
     for key in keys:
         log.info(f'downloading: {key}')
-        name = key[key.rfind('/')+1:]
+        filename = key[key.rfind('/')+1:]
+        if local_dir is not None:
+            filename = f'{local_dir}/{filename}'
         if file_filter is None or name.find(file_filter) >= 0:
-            s3.download_file(s3_bucket, key, f'{local_dir}/{name}')
+            s3.download_file(s3_bucket, key, filename)
 
 def download_file_s3(s3_bucket, s3_filename, local_filename, profile_name=None):
     """
@@ -64,6 +66,14 @@ def download_file_s3(s3_bucket, s3_filename, local_filename, profile_name=None):
     """
     s3 = connect_s3(profile_name)
     s3.download_file(s3_bucket, s3_filename, local_filename)
+
+def rename_file_s3(src_bucket, src_filename, dst_bucket, dst_filename, profile_name=None):
+    """
+    rename / move a file in s3
+    """
+    s3 = connect_s3(profile_name)
+    s3.copy_object(Bucket=dst_bucket, CopySource=f'{src_bucket}/{src_filename}', Key=dst_filename)
+    s3.delete_object(Bucket=src_bucket, Key=src_filename)
 
 def list_s3_directories(s3_bucket, s3_prefix, profile_name=None):
     """

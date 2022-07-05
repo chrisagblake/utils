@@ -152,11 +152,14 @@ def upload_files_instance(ip, files):
         # upload the file
         subprocess.call(['scp', file, f'ubuntu@{ip}:~/{file}'])
 
-def run_cmd(ip, cmd):
+def run_cmd(ip, cmd, in_tmux=True):
     """
     run a command within a tmux session on an EC2 instance
     """
-    subprocess.call(['ssh', f'ubuntu@{ip}', 'tmux', 'new-session', '-d', cmd])
+    if in_tmux:
+        subprocess.call(['ssh', f'ubuntu@{ip}', 'tmux', 'new-session', '-d', cmd])
+    else:
+        subprocess.call(['ssh', f'ubuntu@{ip}', cmd])
 
 def monitor_spot_instance(ami, ins_type, ins_id, files, cmd):
     """

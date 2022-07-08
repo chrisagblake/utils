@@ -85,7 +85,10 @@ def list_s3_directories(s3_bucket, s3_prefix, profile_name=None):
     response = s3.list_objects(Bucket=s3_bucket, Prefix=s3_prefix, Delimiter='/')
     if 'CommonPrefixes' in response:
         for obj in response['CommonPrefixes']:
-            dirs.append(obj['Prefix'][:-1])
+            path = obj['Prefix'][:-1]
+            if path.find('/') > 0:
+                path = path[path.rfind('/')+1:]
+            dirs.append(path)
     return dirs
 
 def launch_instance(ami, ins_type, use_spot, key_name):

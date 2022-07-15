@@ -52,7 +52,7 @@ def download_files_s3(local_dir, s3_bucket, s3_prefix, file_filter=None, profile
             for obj in response['Contents']:
                 keys.append(obj['Key'])
 
-    # download the trained model and associated files
+    # download the files
     for key in keys:
         log.info(f'downloading: {key}')
         filename = key[key.rfind('/')+1:]

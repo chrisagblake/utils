@@ -26,14 +26,20 @@ def upload_files_s3(files, s3_bucket, s3_prefix, profile_name=None, ignore_file_
             name = file[file.rfind('/')+1:]
         else:
             name = file
-        s3.upload_file(file, s3_bucket, f'{s3_prefix}/{name}')
+        if name.find('.json') > 0:
+            s3.upload_file(file, s3_bucket, f'{s3_prefix}/{name}', ExtraArgs={'ContentType': 'application/json'})
+        else:
+            s3.upload_file(file, s3_bucket, f'{s3_prefix}/{name}')
 
 def upload_file_s3(file, s3_bucket, s3_name, profile_name=None):
     """
     upload a file to s3
     """
     s3 = connect_s3(profile_name)
-    s3.upload_file(file, s3_bucket, s3_name)
+    if s3_name.find('.json') > 0:
+        s3.upload_file(file, s3_bucket, s3_name, ExtraArgs={'ContentType': 'application/json'})
+    else:
+        s3.upload_file(file, s3_bucket, s3_name)
 
 def download_files_s3(local_dir, s3_bucket, s3_prefix, file_filter=None, profile_name=None):
     """
